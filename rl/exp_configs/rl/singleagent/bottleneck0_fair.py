@@ -22,7 +22,7 @@ from flow.controllers import RLController, ContinuousRouter
 # time horizon of a single rollout
 HORIZON = 1500
 # number of parallel workers
-N_CPUS = 2
+N_CPUS = 1
 # number of rollouts per training iteration
 N_ROLLOUTS = N_CPUS * 4
 

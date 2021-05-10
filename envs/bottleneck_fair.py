@@ -59,6 +59,14 @@ MEAN_NUM_SECONDS_WAIT_AT_TOLL = 15  # Average waiting time at toll
 BOTTLE_NECK_LEN = 280  # Length of bottleneck
 NUM_VEHICLE_NORM = 20
 
+# reward terms scaling for fairness terms
+# adding scaling terms because at some timesteps the stds go upto 7
+# and we don't want these terms to dominate the outflow_rate reward term
+# NOTE: Can make FAIR_SCALIN_4 = 0 for just considering fairness on edge_3
+# as discussed 
+FAIR_SCALING_3 = 1/10   # scaling for fairness reward on edge 3
+FAIR_SCALING_4 = 1/10   # scaling for fairness reward on edge 4
+
 ADDITIONAL_ENV_PARAMS = {
     # maximum acceleration for autonomous vehicles, in m/s^2
     "max_accel": 3,
@@ -506,33 +514,34 @@ class BottleneckEnv(Env):
 
 
 class BottleneckAccelFairEnv(BottleneckEnv):
-    """BottleneckAccelFairEnv.
+    """
+        BottleneckAccelFairEnv.
 
-    Environment used to train vehicles to effectively pass through a
-    bottleneck.
+        Environment used to train vehicles to effectively pass through a
+        bottleneck.
 
-    States
-        An observation is the edge position, speed, lane, and edge number of
-        the AV, the distance to and velocity of the vehicles
-        in front and behind the AV for all lanes. Additionally, we pass the
-        density and average velocity of all edges. Finally, we pad with
-        zeros in case an AV has exited the system.
-        Note: the vehicles are arranged in an initial order, so we pad
-        the missing vehicle at its normal position in the order
+        States
+            An observation is the edge position, speed, lane, and edge number of
+            the AV, the distance to and velocity of the vehicles
+            in front and behind the AV for all lanes. Additionally, we pass the
+            density and average velocity of all edges. Finally, we pad with
+            zeros in case an AV has exited the system.
+            Note: the vehicles are arranged in an initial order, so we pad
+            the missing vehicle at its normal position in the order
 
-    Actions
-        The action space consist of a list in which the first half
-        is accelerations and the second half is a direction for lane
-        changing that we round
+        Actions
+            The action space consist of a list in which the first half
+            is accelerations and the second half is a direction for lane
+            changing that we round
 
-    Rewards
-        The reward is the two-norm of the difference between the speed of
-        all vehicles in the network and some desired speed. To this we add
-        a positive reward for moving the vehicles forward, and a penalty to
-        vehicles that lane changing too frequently.
+        Rewards
+            The reward is the two-norm of the difference between the speed of
+            all vehicles in the network and some desired speed. To this we add
+            a positive reward for moving the vehicles forward, and a penalty to
+            vehicles that lane changing too frequently.
 
-    Termination
-        A rollout is terminated once the time horizon is reached.
+        Termination
+            A rollout is terminated once the time horizon is reached.
     """
 
     def __init__(self, env_params, sim_params, network, simulator='traci'):
@@ -737,24 +746,26 @@ class BottleneckAccelFairEnv(BottleneckEnv):
 
 
 class BottleneckDesiredVelocityFairEnv(BottleneckEnv):
-    """BottleneckDesiredVelocityFairEnv.
+    """
+        BottleneckDesiredVelocityFairEnv.
 
-    Environment used to train vehicles to effectively pass through a
-    bottleneck by specifying the velocity that RL vehicles should attempt to
-    travel in certain regions of space.
+        Environment used to train vehicles to effectively pass through a
+        bottleneck by specifying the velocity that RL vehicles should attempt to
+        travel in certain regions of space.
 
-    States
-        An observation is the number of vehicles in each lane in each
-        segment
+        States
+            An observation is the number of vehicles in each lane in each
+            segment
 
-    Actions
-        The action space consist of a list in which each element
-        corresponds to the desired speed that RL vehicles should travel in
-        that region of space
+        Actions
+            The action space consist of a list in which each element
+            corresponds to the desired speed that RL vehicles should travel in
+            that region of space
 
-    Rewards
-        The reward is the outflow of the bottleneck plus a reward
-        for RL vehicles making forward progress
+        Rewards
+            The reward is the outflow of the bottleneck plus a reward
+            for RL vehicles making forward progress plus a penalty
+            for unfair controls
     """
 
     def __init__(self, env_params, sim_params, network, simulator='traci'):
@@ -997,15 +1008,57 @@ class BottleneckDesiredVelocityFairEnv(BottleneckEnv):
                     self.k.vehicle.set_max_speed(rl_id, 23.0)
 
     def compute_reward(self, rl_actions, **kwargs):
-        """Outflow rate over last ten seconds normalized to max of 1."""
+        """Evaluate the fairness rewards"""
         if self.env_params.evaluate:
             if self.time_counter == self.env_params.horizon:
                 reward = self.k.vehicle.get_outflow_rate(500)
             else:
                 return 0
         else:
-            reward = self.k.vehicle.get_outflow_rate(10 * self.sim_step) / \
+            veh_ids_edge_3 = self.k.vehicle.get_ids_by_edge('3') # the first bottleneck
+            veh_ids_edge_4 = self.k.vehicle.get_ids_by_edge('4') # the second bottleneck
+
+            num_lanes_3 = self.k.network.num_lanes('3') # lanes in the first bottleneck
+            num_lanes_4 = self.k.network.num_lanes('4') # lanes in the second bottleneck
+            lane_speeds_3_list = [[] for lane_num in range(num_lanes_3)]
+            lane_speeds_4_list = [[] for lane_num in range(num_lanes_4)]
+
+            # get the speeds of all vehicles in different lanes
+            for veh_id in veh_ids_edge_3:
+                lane = self.k.vehicle.get_lane(veh_id)
+                speed = self.k.vehicle.get_speed(veh_id)
+                lane_speeds_3_list[lane].append(speed)
+            
+            for veh_id in veh_ids_edge_4:
+                lane = self.k.vehicle.get_lane(veh_id)
+                speed = self.k.vehicle.get_speed(veh_id)
+                lane_speeds_4_list[lane].append(speed)
+
+            # evaluate the mean speeds in all lanes
+            mean_speeds_3 = [np.mean(lane_speeds_3_list[lane_num]) for lane_num in range(num_lanes_3)]
+            mean_speeds_4 = [np.mean(lane_speeds_4_list[lane_num]) for lane_num in range(num_lanes_4)]
+
+            if np.isnan(mean_speeds_3).all():
+                # if all nans then give 0 
+                fair_rew_edge3 = 0
+            else:
+                # ignore nans while evaluating std
+                fair_rew_edge3 = - np.nanstd(mean_speeds_3)
+
+            if np.isnan(mean_speeds_4).all():
+                # if all nans then give 0 
+                fair_rew_edge4 = 0
+            else:
+                # ignore nans while evaluating std
+                fair_rew_edge4 = - np.nanstd(mean_speeds_4) # give penalty
+
+            step_reward = self.k.vehicle.get_outflow_rate(10 * self.sim_step) / \
                 (2000.0 * self.scaling)
+            
+            reward = step_reward + \
+                    (FAIR_SCALING_3 * fair_rew_edge3) + \
+                    (FAIR_SCALING_4 * fair_rew_edge4)
+
         return reward
 
     def reset(self):
