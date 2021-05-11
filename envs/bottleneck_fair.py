@@ -11,7 +11,6 @@ use variance (var) of vehicle speeds
 experiment 1: fairness from only edges w/4 lanes (edges 1-3)
 experiment 2: fairness w/with edges 1-4 (after bottleneck)
 
-TODO: check if we should copy from a diff env than bottleneckdesiredvelocity
 ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
 Environments for training vehicles to reduce capacity drops in a bottleneck.
@@ -1034,21 +1033,21 @@ class BottleneckDesiredVelocityFairEnv(BottleneckEnv):
                 speed = self.k.vehicle.get_speed(veh_id)
                 lane_speeds_4_list[lane].append(speed)
 
-            # evaluate the mean speeds in all lanes
-            mean_speeds_3 = [np.mean(lane_speeds_3_list[lane_num]) for lane_num in range(num_lanes_3)]
-            mean_speeds_4 = [np.mean(lane_speeds_4_list[lane_num]) for lane_num in range(num_lanes_4)]
-
-            if np.isnan(mean_speeds_3).all():
-                # if all nans then give 0 
+            if not any(lane_speeds_3_list):
+                # if all lists of lane speeds in lane_speeds_3_list are empty (no cars in the edge) then give 0 
                 fair_rew_edge3 = 0
             else:
+                # evaluate the mean speeds for each lane in edge 3 if the list of speeds for that lane is non empty
+                mean_speeds_3 = [np.mean(lane_speeds) for lane_speeds in lane_speeds_3_list if lane_speeds]
                 # ignore nans while evaluating std
                 fair_rew_edge3 = - np.nanstd(mean_speeds_3)
 
-            if np.isnan(mean_speeds_4).all():
-                # if all nans then give 0 
+            if not any(lane_speeds_4_list):
+                # if all lists of lane speeds in lane_speeds_4_list are empty (no cars in the edge) then give 0 
                 fair_rew_edge4 = 0
             else:
+                # evaluate the mean speeds for each lane in edge 4 if the list of speeds for that lane is non empty
+                mean_speeds_4 = [np.mean(lane_speeds) for lane_speeds in lane_speeds_4_list if lane_speeds]
                 # ignore nans while evaluating std
                 fair_rew_edge4 = - np.nanstd(mean_speeds_4) # give penalty
 
