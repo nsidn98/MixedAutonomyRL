@@ -10,7 +10,7 @@ of space. The autonomous penetration rate in this example is 10%.
 import sys, os
 # this adds MixedAutonomyRL/ in path to import from envs/ folder
 sys.path.append(os.path.abspath(os.getcwd()))
-from envs.bottleneck_fair import BottleneckDesiredVelocityFairEnv
+from envs.bottleneck_fair_edge4 import BottleneckDesiredVelocityFairEnv
 
 from flow.networks import BottleneckNetwork
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
