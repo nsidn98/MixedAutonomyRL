@@ -1,17 +1,18 @@
-"""Benchmark for bottleneck1.
+"""Benchmark for bottleneck0.
 
 Bottleneck in which the actions are specifying a desired velocity in a segment
-of space. The autonomous penetration rate in this example is 25%.
-Human lane changing is enabled.
+of space. The autonomous penetration rate in this example is 10%.
 
 - **Action Dimension**: (?, )
 - **Observation Dimension**: (?, )
 - **Horizon**: 1000 steps
 """
-# from flow.envs import BottleneckDesiredVelocityEnv
 import sys, os
+# this adds MixedAutonomyRL/ in path to import from envs/ folder
 sys.path.append(os.path.abspath(os.getcwd()))
-from envs.bottleneck import BottleneckDesiredVelocityEnv
+# from envs.bottleneck import BottleneckDesiredVelocityEnv
+from envs.bottleneck_fair import BottleneckDesiredVelocityFairEnv
+
 from flow.networks import BottleneckNetwork
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams, SumoLaneChangeParams
@@ -21,17 +22,64 @@ from flow.controllers import RLController, ContinuousRouter
 
 # time horizon of a single rollout
 HORIZON = 1500
-
+# number of parallel workers
 N_CPUS = 2
+# number of rollouts per training iteration
 N_ROLLOUTS = N_CPUS * 4
+
 SCALING = 1
 NUM_LANES = 4 * SCALING  # number of lanes in the widest highway
 DISABLE_TB = True
 DISABLE_RAMP_METER = True
-# AV_FRAC = 0.25
-AV_FRAC = 0.1
+AV_FRAC = 0.10
 
 vehicles = VehicleParams()
+
+import numpy as np
+import random
+driver_params = [] # list of dictionaries of human driver params
+num_humans = 5
+sim_step_ = 0.5 # defined later in the file under flow_params
+for i in range(num_humans):
+    max_accel = np.random.normal(2.7, 0.1)
+    tau = np.random.normal(1, 1)
+    tau = max(sim_step_, tau)
+    tau = min(tau, 4)
+    speedgain = np.random.normal(1, 1)
+    speedgain = max(0, speedgain)
+    speedgain = min(speedgain, 2)
+    speedgain_lookahead = np.random.poisson(1)
+    speedgain_lookahead = max(5, speedgain_lookahead)
+    pushy = 0.3
+    impatience = np.random.normal(0, 0.16)
+    impatience = max(0.5, impatience)
+    impatience = min(impatience, -0.5)
+    cooperative = np.random.uniform(0, 1)
+    d = {'max_a': max_accel, 'tau': tau, 'speedgain': speedgain, 
+            'speedgain_lookahead': speedgain_lookahead, 
+            'pushy': pushy,
+            'impatience': impatience,
+            'cooperative': cooperative
+    }
+    driver_params.append(d)
+for i in range(num_humans):
+    p = driver_params[i]
+    vehicles.add(
+        veh_id='human_'+str(i),
+        routing_controller=(ContinuousRouter, {}),
+        car_following_params=SumoCarFollowingParams(
+            speed_mode=9,
+            accel=p['max_a'],
+            tau = p['tau'],
+        ),
+        lane_change_params=SumoLaneChangeParams(
+            lane_change_mode = 0, #"sumo_default",
+            lc_speed_gain = p['speedgain'],
+            lc_pushy = p['pushy'],
+            lc_cooperative = p['cooperative'],
+        ),
+        num_vehicles = 1 * SCALING)
+
 vehicles.add(
     veh_id="human",
     routing_controller=(ContinuousRouter, {}),
@@ -39,7 +87,7 @@ vehicles.add(
         speed_mode=9,
     ),
     lane_change_params=SumoLaneChangeParams(
-        lane_change_mode=1621,
+        lane_change_mode=0,
     ),
     num_vehicles=1 * SCALING)
 vehicles.add(
@@ -57,6 +105,7 @@ vehicles.add(
 controlled_segments = [("1", 1, False), ("2", 2, True), ("3", 2, True),
                        ("4", 2, True), ("5", 1, False)]
 num_observed_segments = [("1", 1), ("2", 3), ("3", 3), ("4", 3), ("5", 1)]
+
 additional_env_params = {
     "target_velocity": 40,
     "disable_tb": True,
@@ -76,10 +125,19 @@ flow_rate = 2500 * SCALING
 
 # percentage of flow coming out of each lane
 inflow = InFlows()
+
+for i in range(num_humans):
+    inflow.add(
+        veh_type='human_'+str(i),
+        edge="1",
+        vehs_per_hour= flow_rate * ((1 - AV_FRAC)/(num_humans + 1)),
+        departLane = 'random',
+        departSpeed=10
+    )
 inflow.add(
     veh_type="human",
     edge="1",
-    vehs_per_hour=flow_rate * (1 - AV_FRAC),
+    vehs_per_hour=flow_rate * ((1 - AV_FRAC)/(num_humans+1)),
     departLane="random",
     departSpeed=10)
 inflow.add(
@@ -102,10 +160,10 @@ net_params = NetParams(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="bottleneck_1",
+    exp_tag="bottleneck_0",
 
     # name of the flow environment the experiment is running on
-    env_name=BottleneckDesiredVelocityEnv,
+    env_name=BottleneckDesiredVelocityFairEnv,
 
     # name of the network class the experiment is running on
     network=BottleneckNetwork,

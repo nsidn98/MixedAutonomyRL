@@ -37,7 +37,7 @@ vehicles = VehicleParams()
 import numpy as np
 import random
 driver_params = [] # list of dictionaries of human driver params
-num_humans = 10
+num_humans = 5
 sim_step_ = 0.5 # defined later in the file under flow_params
 for i in range(num_humans):
     max_accel = np.random.normal(2.7, 0.1)
@@ -129,14 +129,14 @@ for i in range(num_humans):
     inflow.add(
         veh_type='human_'+str(i),
         edge="1",
-        vehs_per_hour= flow_rate * (1 - AV_FRAC)/(num_humans + 1),
+        vehs_per_hour= flow_rate * ((1 - AV_FRAC)/(num_humans + 1)),
         departLane = 'random',
         departSpeed=10
     )
 inflow.add(
     veh_type="human",
     edge="1",
-    vehs_per_hour=flow_rate * (1 - AV_FRAC)/(num_humans+1),
+    vehs_per_hour=flow_rate * ((1 - AV_FRAC)/(num_humans+1)),
     departLane="random",
     departSpeed=10)
 inflow.add(

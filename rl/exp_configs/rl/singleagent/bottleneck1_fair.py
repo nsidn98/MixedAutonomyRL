@@ -11,7 +11,8 @@ Human lane changing is enabled.
 # from flow.envs import BottleneckDesiredVelocityEnv
 import sys, os
 sys.path.append(os.path.abspath(os.getcwd()))
-from envs.bottleneck import BottleneckDesiredVelocityEnv
+# from envs.bottleneck import BottleneckDesiredVelocityEnv
+from envs.bottleneck_fair_edge4 import BottleneckDesiredVelocityFairEnv
 from flow.networks import BottleneckNetwork
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams, \
     InFlows, SumoCarFollowingParams, SumoLaneChangeParams
@@ -105,7 +106,7 @@ flow_params = dict(
     exp_tag="bottleneck_1",
 
     # name of the flow environment the experiment is running on
-    env_name=BottleneckDesiredVelocityEnv,
+    env_name=BottleneckDesiredVelocityFairEnv,
 
     # name of the network class the experiment is running on
     network=BottleneckNetwork,
