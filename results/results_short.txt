@@ -1,0 +1,205 @@
+Fairness on edge 4 Bottleneck0
+==== Summary of results ====
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1489.5, 9.4135
+
+Throughput efficiency (veh/hr):
+Average, std: 0.5944, 0.0037
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 0.0644, 0.0534
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 0.0318, 0.0285
+
+========================================================================
+
+No Fairness Bottleneck0
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1589.94, 68.7569
+
+Throughput efficiency (veh/hr):
+Average, std: 0.6345, 0.0274
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 6.0091, 1.9731
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 5.1810, 2.2494
+
+========================================================================
+
+Bottleneck0 Benchmark More drivers
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1587.42, 88.6358
+
+Throughput efficiency (veh/hr):
+Average, std: 0.6353, 0.0354
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 7.7162, 3.3361
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 7.8297, 2.6012
+========================================================================
+
+Bottleneck0 Fair edge34 More drivers 50
+
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1416.06, 17.2189
+
+Throughput efficiency (veh/hr):
+Average, std: 0.5667, 0.0068
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 0.2632, 0.1758
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 0.1548, 0.2224
+
+========================================================================
+
+Bottleneck0 Fairness on edge 34
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1514.7, 30.6185
+
+Throughput efficiency (veh/hr):
+Average, std: 0.6045, 0.0122
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 0.0650, 0.0866
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 0.2625, 0.5773
+
+========================================================================
+
+Bottleneck1 Benchmark
+
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1733.0248, 71.2798
+
+Average, std: 2505.8515, 1.5710
+Throughput efficiency (veh/hr):
+Average, std: 0.6915, 0.0285
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 1.0757, 0.5137
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 7.9292, 1.5106
+
+========================================================================
+
+Bottleneck1 Fair edge34
+
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1499.7464, 29.9638
+
+Throughput efficiency (veh/hr):
+Average, std: 0.5984, 0.0121
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 0.2565, 0.1455
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 0.1217, 0.0786
+
+========================================================================
+
+Bottleneck1 Fair edge4
+
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1495.9657, 26.3179
+
+Inflows (veh/hr):
+Average, std: 2505.9924, 2.4511
+
+Throughput efficiency (veh/hr):
+Average, std: 0.5969, 0.0110
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 0.1491, 0.0848
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 0.2092, 0.2180
+
+========================================================================
+
+Bottleneck1 Benchmark More drivers
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1608.5569, 91.8871
+
+Throughput efficiency (veh/hr):
+Average, std: 0.6434, 0.0373
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 2.2340, 1.2048
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 7.0668, 1.2711
+========================================================================
+
+Bottleneck1 Fair edge34 More drivers
+
+==== Summary of results ====
+
+Metrics over last 500 seconds of simulation:
+
+Outflows (veh/hr):
+Average, std: 1463.0, 11.7428
+
+Throughput efficiency (veh/hr):
+Average, std: 0.5855, 0.0047
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 0.2077, 0.1928
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 0.0884, 0.0569
+
+========================================================================
+
+Average, std: 1463.0 $\pm$ 11.7428
+
+Throughput efficiency (veh/hr):
+Average, std: 0.5855 $\pm$ 0.0047
+
+Standard deviations of average lane speeds in edge 3, last 500 seconds
+Mean and standard deviation across timesteps: 0.2077 $\pm$ 0.1928
+
+Standard deviations of average lane speeds in edge 4, last 500 seconds
+Mean and standard deviation across timesteps: 0.0884 $\pm$ 0.0569
